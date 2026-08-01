@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h3 class="display-1">A Guide to Getting Lost</h3>
+
+
+<!-- container = centres content + caps width. Without it, text stretches edge-to-edge on wide screens. -->
+<div class="container my-4">
+
+  <!-- row/col: on phones (default) full width; on medium+ screens, 8/12 width centred via mx-auto -->
+  <div class="row">
+    <div class="col-12 col-md-10 col-lg-8 mx-auto">
+
+    {% for blog in blogs %}
+    <!-- each post = its own pill card -->
+      <div class="mb-4 py-4 px-5 shadow-lg rounded-pill border border-5">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <p class="lead mb-0">{{ blog.title }}</p>
+          <p class="mb-0 mt-2 small text-muted">{{ blog.author }} | {{ blog.date_posted }}</p> 
+        </div>
+        <p class="mb-0">{{ blog.content }}</p>
+      </div>
+      {% endfor %}
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
