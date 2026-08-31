@@ -4,3 +4,5 @@ __pycache__/
 venv/
 blog.db
 .env
+node_modules/
+*.sqlite3

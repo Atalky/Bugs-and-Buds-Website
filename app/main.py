@@ -17,18 +17,28 @@ blogs: list[dict] = [
 ]
 
 
+def get_events():
+    return [
+        {"id": 1, "title": "Gym", "top": 480, "height": 60, "colour": "#0d6efd"},        # 08:00
+        {"id": 2, "title": "Deep work", "top": 600, "height": 120, "colour": "#dc3545"}, # 10:00
+    ]
+
+
 @app.get("/", include_in_schema=False)
 def home(request: Request):
-    return templates.TemplateResponse(request, "index.html")
+    return templates.TemplateResponse(request, "index.html", {"events": get_events()})
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/blog", include_in_schema=False)
 def blog(request: Request):
-    
-    
     return templates.TemplateResponse(request, "blog.html", {"blogs": blogs})
+
 
 @app.get("/api/blog")
 def get_blogs():
     return blogs
+
+
+@app.get("/api/calendar")
+def api_calendar():
+    return get_events()

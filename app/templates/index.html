@@ -4,7 +4,7 @@
 <section id="intro">
 
   <div class="container-lg my-5">
-    
+
     <div class="row justify-content-center">
       <div class="col-md text-center text-md-start">
         <h1 class="display-2">Today's Tasks</h1>
@@ -12,22 +12,93 @@
       </div>
     </div>
 
-    <!-- task list -->
+    <!-- calendar grid -->
     <div class="row justify-content-center mt-4">
       <div class="col-12 col-md-8">
-        <ul class="list-group shadow-sm">
-          {% for task in tasks %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span>{{ task.title }}</span>
-            <span class="badge bg-secondary">{{ task.due }}</span>
-          </li>
-          {% else %}
-          <li class="list-group-item text-muted">Nothing today.</li>
+
+        <!-- 6am-10pm = 16 hours × 60px =1440px -->
+        <div id="grid" class="position-relative border rounded" style="height: 1440px;">
+
+          {% for hour in range(0, 24) %}
+          <div class="position-absolute w-100 border-top"
+              style="top: {{ hour * 60 }}px; height: 60px;">
+            <small class="text-body-secondary ps-1">{{ "%02d:00"|format(hour) }}</small>
+          </div>
           {% endfor %}
-        </ul>
+
+          {% for e in events %}
+          <div class="position-absolute rounded px-2 py-1 small text-white"
+               data-id="{{ e.id }}"
+               style="top: {{ e.top }}px; height: {{ e.height }}px;
+                      left: 60px; right: 8px; background: {{ e.colour }};">
+            {{ e.title }}
+          </div>
+          {% endfor %}
+
+        </div>
+
       </div>
     </div>
   </div>
+
 </section>
 
+{# <script>
+  const grid = document.getElementById('grid');
+
+  grid.addEventListener('click', (e) => {
+    // grid's position on screen
+    const rect = grid.getBoundingClientRect();
+    // mouse Y minus grid top = pixels from grid start = minutes from midnight
+    const y = e.clientY - rect.top;
+    console.log(y);
+  });
+</script> #}
+
+<script>
+  const grid = document.getElementById('grid');
+  const SNAP = 15;   // round to 15-minute slots
+  const DEFAULT_DURATION = 60;
+  let eventCounter = 0;
+
+
+  grid.addEventListener('click', (e) => {
+
+    if (e.target.closest('[data-id]')) return;
+
+    const rect = grid.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const minutes = Math.round(y / SNAP) * SNAP;   // snap to nearest 15
+    
+    const hour = Math.floor(minutes / 60);
+    const min = minutes % 60;
+
+    const title = prompt('Event Title:');
+    if (!title) return;
+
+    drawEvent(title, minutes, DEFAULT_DURATION, '#0d6efd');
+  });
+
+    grid.addEventListener('contextmenu', (e) => {
+    const eventBox = e.target.closest('[data-id]');
+    if (!eventBox) return;
+
+    e.preventDefault();   // stop the browser's right-click menu
+
+    if (confirm(`Delete "${eventBox.textContent}"?`)) {
+      eventBox.remove();
+    }
+  });
+
+  function drawEvent(title, top, height, colour) {
+    const div = document.createElement('div');
+    div.className = 'position-absolute rounded px-2 py-1 small text-white';
+    div.dataset.id = `local-${eventCounter++}`;
+    div.style.cssText = `top:${top}px; height:${height}px; left:60px; right:8px; background:${colour};`;
+    div.textContent = title;
+    grid.appendChild(div);
+  }
+</script>
+
 {% endblock %}
+
