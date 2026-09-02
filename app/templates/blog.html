@@ -13,7 +13,7 @@
     <div class="col-12 col-md-10 col-lg-8 mx-auto">
 
     {% for blog in blogs %}
-    <!-- each post = its own pill card -->
+    <!-- post = plog_id -->
       <div class="mb-4 py-4 px-5 shadow-lg rounded-pill border border-5">
         <div class="d-flex justify-content-between align-items-start mb-2">
           <a class="lead mb-0 text-decoration-none" href="{{ request.url_for('blog_detail', blog_id=blog.id) }}">{{ blog.title }}</a>          <p class="mb-0 mt-2 small text-muted">{{ blog.author }} | {{ blog.date_posted }}</p> 

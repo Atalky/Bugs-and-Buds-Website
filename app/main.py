@@ -1,7 +1,12 @@
-from fastapi import FastAPI, Request, HTTPException , status
+from fastapi import FastAPI, Request , status, HTTPException
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
+
 
 BASE_DIR = Path(__file__).resolve().parent   # always point to /Website/app, wherever you run from
 app = FastAPI()
@@ -79,3 +84,39 @@ def get_events():
 @app.get("/api/calendar")
 def api_calendar():
     return get_events()
+
+'''
+exception handler
+'''
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exception: StarletteHTTPException):
+    if request.url.path.startswith("/api"):
+        return JSONResponse(status_code=exception.status_code, 
+                            content={"detail": exception.detail})
+    
+    return templates.TemplateResponse(
+        request, "error.html",
+        {
+        "status_code": exception.status_code, 
+        "message": exception.detail
+        },
+        status_code=exception.status_code,
+    )
+
+'''
+exception handler
+'''
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exception: RequestValidationError):
+    if request.url.path.startswith("/api"):
+        return JSONResponse(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, 
+                            content={"detail": exception.errors()})
+    
+    return templates.TemplateResponse(
+        request, "error.html",
+        {
+        "status_code": status.HTTP_422_UNPROCESSABLE_CONTENT, 
+        "message": "Invalid request"
+        },
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+    )
