@@ -7,6 +7,7 @@
 
     <div class="row justify-content-center">
       <div class="col-md text-center text-md-start">
+        <p class="lead text-muted mb-2">Hi, I'm Atal — this is my personal dev space: a live day planner, a running <a href="/blog">devlog</a> of what I'm building, and the tech projects I'm working through as I learn.</p>
         <h1 class="display-2">Today's Tasks</h1>
         <p class="display-6 text-muted fst-italic">{{ quote }}</p>
       </div>
@@ -42,18 +43,6 @@
   </div>
 
 </section>
-
-{# <script>
-  const grid = document.getElementById('grid');
-
-  grid.addEventListener('click', (e) => {
-    // grid's position on screen
-    const rect = grid.getBoundingClientRect();
-    // mouse Y minus grid top = pixels from grid start = minutes from midnight
-    const y = e.clientY - rect.top;
-    console.log(y);
-  });
-</script> #}
 
 <script>
   const grid = document.getElementById('grid');

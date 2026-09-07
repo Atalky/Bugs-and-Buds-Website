@@ -6,7 +6,8 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
-
+from datetime import date
+from schemas import BlogCreate, BlogResponse
 
 BASE_DIR = Path(__file__).resolve().parent   # always point to /Website/app, wherever you run from
 app = FastAPI()
@@ -29,20 +30,58 @@ blogs : list[dict] = [
     {
         "id": 1,
         "author": "Atal",
-        "title": "First Post.",
-        "content": "first post. ",
-        "date_posted": "2022-01-01",
+        "title": "My reason and goal for this devlog",
+        "content": (
+            "I set this project up to learn more about FastAPI and how to integrate AI into real services, "
+            "including tool-using agents. My aim for this project and this devlog is to document my learning "
+            "and how my understanding evolves as I go. I already have university-level Spring Boot experience "
+            "(see my GitHub), and I'm now learning the Python equivalent for speed and for AI/ML integration. "
+            "Today I went back through the FastAPI documentation to make sure the fundamentals were solid "
+            "before building further on top of them."
+        ),
+        "date_posted": "2026-08-01",
     },
     {
         "id": 2,
         "author": "Atal",
-        "title": "Second Post.",
-        "content": "second post. ",
-        "date_posted": "2022-01-02",
+        "title": "Initial commit",
+        "content": "First commit on the project — scaffolding the FastAPI app that this devlog now runs on.",
+        "date_posted": "2026-08-01",
+    },
+    {
+        "id": 3,
+        "author": "Atal",
+        "title": "Clean up repo, add requirements",
+        "content": "Went back through the early scaffolding and tidied it up, and added a requirements file so the project's dependencies are actually pinned down instead of just installed loose in whatever environment I happened to be using.",
+        "date_posted": "2026-08-31",
+    },
+    {
+        "id": 4,
+        "author": "Atal",
+        "title": "Blog list/detail routes, migrated to uv, started SQLAlchemy models",
+        "content": "Added the blog list and blog-detail routes, sharing one 404 helper between them instead of repeating the lookup logic. Also switched the project over from pip to uv for dependency management, and started the SQLAlchemy models that will eventually replace the in-memory blogs list with a real database.",
+        "date_posted": "2026-09-01",
+    },
+    {
+        "id": 5,
+        "author": "Atal",
+        "title": "Custom error page, proper exception handlers",
+        "content": "Added a custom error page and wired up handlers for both HTTP exceptions and validation errors, so a bad request returns something readable instead of FastAPI's default JSON dump. Also fixed a missing Path import that had been quietly relying on it being imported somewhere else.",
+        "date_posted": "2026-09-02",
+    },
+    {
+        "id": 6,
+        "author": "Atal",
+        "title": "Fixed the boot bugs and wrote the create-blog endpoint",
+        "content": "Found and fixed three bugs that were stopping the app from starting at all: a schema class name that didn't match its import, a duplicate field on BlogBase that was silently overwriting itself, and a POST decorator with no function underneath it. Wrote the actual create_blog handler that decorator was missing, and gave BlogCreate real fields instead of the empty stub it had before.",
+        "date_posted": "2026-09-07",
     },
 
 ]
 
+'''
+
+'''
 def get_blogs():
     return blogs
 
@@ -50,9 +89,20 @@ def get_blogs():
 def blog_list(request: Request):
     return templates.TemplateResponse(request, "blog.html", {"blogs": get_blogs()})
 
-@app.get("/api/blog")
+@app.get("/blog/{blog_id}", include_in_schema=False, name="blog_detail")
+def blog_detail(request: Request, blog_id: int):
+    found = find_blog_or_404(blog_id)
+    return templates.TemplateResponse(request, "blog_detail.html", {"blog": found})
+
+
+'''
+Api
+'''
+
+@app.get("/api/blog", response_model=list[BlogResponse])
 def api_get_blogs():
     return get_blogs()
+
 
 def find_blog_or_404(blog_id: int) -> dict:
     for blog in blogs:
@@ -61,19 +111,28 @@ def find_blog_or_404(blog_id: int) -> dict:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found")
 
 
-@app.get("/blog/{blog_id}", include_in_schema=False, name="blog_detail")
-def blog_detail(request: Request, blog_id: int):
-    found = find_blog_or_404(blog_id)
-    return templates.TemplateResponse(request, "blog_detail.html", {"blog": found})
-
-
-@app.get("/api/blog/{blog_id}")
+@app.get("/api/blog/{blog_id}", response_model=BlogResponse)
 def get_blog_api(blog_id: int):
     return find_blog_or_404(blog_id)
 
 '''
-Calendar
+Create Blog
 '''
+
+@app.post("/api/blog", response_model=BlogResponse, status_code=status.HTTP_201_CREATED)
+def create_blog(payload: BlogCreate):
+    new_id = max((blog["id"] for blog in blogs), default=0) + 1
+    new_blog = {
+        "id": new_id,
+        "author": "Atal",
+        "title": payload.title,
+        "content": payload.content,
+        "date_posted": date.today().isoformat(),
+    }
+    blogs.append(new_blog)
+    return new_blog
+
+
 def get_events():
     return [
         {"id": 1, "title": "Gym", "top": 480, "height": 60, "colour": "#0d6efd"},        # 08:00
@@ -104,7 +163,7 @@ async def http_exception_handler(request: Request, exception: StarletteHTTPExcep
     )
 
 '''
-exception handler
+exception handler validaiton 
 '''
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exception: RequestValidationError):
