@@ -76,6 +76,22 @@ blogs : list[dict] = [
         "content": "Found and fixed three bugs that were stopping the app from starting at all: a schema class name that didn't match its import, a duplicate field on BlogBase that was silently overwriting itself, and a POST decorator with no function underneath it. Wrote the actual create_blog handler that decorator was missing, and gave BlogCreate real fields instead of the empty stub it had before.",
         "date_posted": "2026-09-07",
     },
+            "id": 7,
+        "author": "Atal",
+        "title": "Dockerized it and got it live on Render",
+        "content": (
+            "Wrapped the app in a Dockerfile (python:3.13-slim base, uv sync for deps) so the build is "
+            "reproducible instead of 'works on my machine.' First Render deploy attempt failed because "
+            "the Dockerfile existed locally but had never actually been committed and pushed. Fixed that, "
+            "and the devlog is now live at a real URL instead of just localhost. Also pulled the calendar "
+            "off the public homepage for now — it was a rough single-day sketch, not the level of polish "
+            "I actually want, and I'd rather get the framework, auth, and the AI feature solid first and "
+            "come back to the calendar properly later. Replaced it with a simple intro page instead. Last "
+            "thing: found a real mobile bug where the devlog post cards used a rounded-pill shape that broke "
+            "on longer post text, overflowing off the card on phone screens — swapped it for a normal "
+            "rounded corner."
+        ),
+        "date_posted": "2026-09-08",
 
 ]
 
