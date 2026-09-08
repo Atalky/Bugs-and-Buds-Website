@@ -76,7 +76,8 @@ blogs : list[dict] = [
         "content": "Found and fixed three bugs that were stopping the app from starting at all: a schema class name that didn't match its import, a duplicate field on BlogBase that was silently overwriting itself, and a POST decorator with no function underneath it. Wrote the actual create_blog handler that decorator was missing, and gave BlogCreate real fields instead of the empty stub it had before.",
         "date_posted": "2026-09-07",
     },
-            "id": 7,
+    {        
+    "id": 7,
         "author": "Atal",
         "title": "Dockerized it and got it live on Render",
         "content": (
@@ -92,7 +93,7 @@ blogs : list[dict] = [
             "rounded corner."
         ),
         "date_posted": "2026-09-08",
-
+    },
 ]
 
 '''
