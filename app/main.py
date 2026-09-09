@@ -97,7 +97,14 @@ blogs : list[dict] = [
 ]
 
 '''
+Tech Projects
+'''
+@app.get("/projects", include_in_schema=False)
+def tech_projects(request: Request):
+    return templates.TemplateResponse(request, "techproject.html", {})
 
+'''
+blogs
 '''
 def get_blogs():
     return blogs
@@ -162,12 +169,6 @@ def get_events():
 def api_calendar():
     return get_events()
 
-'''
-Tech Projects
-'''
-@app.get("/projects", include_in_schema=False)
-def tech_projects(request: Request):
-    return templates.TemplateResponse(request, "techproject.html", {})
 
 '''
 exception handler
