@@ -6,3 +6,9 @@
   Nothing below is wired up to a page yet — add rules here as you need something
   Bootstrap doesn't already give you a class for.
 */
+
+.navbar-nav .nav-link.active {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
+}
