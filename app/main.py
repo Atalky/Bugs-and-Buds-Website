@@ -121,6 +121,7 @@ def api_get_blogs():
     return get_blogs()
 
 
+
 def find_blog_or_404(blog_id: int) -> dict:
     for blog in blogs:
         if blog["id"] == blog_id:
@@ -160,6 +161,13 @@ def get_events():
 @app.get("/api/calendar")
 def api_calendar():
     return get_events()
+
+'''
+Tech Projects
+'''
+@app.get("/projects", include_in_schema=False)
+def tech_projects(request: Request):
+    return templates.TemplateResponse(request, "techproject.html", {})
 
 '''
 exception handler

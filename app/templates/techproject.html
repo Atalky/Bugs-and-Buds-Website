@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h3 class="display-1">Tech Projects</h3>
+
+<div class="container my-4">
+  <div class="row">
+    <div class="col-12 col-md-10 col-lg-8 mx-auto">
+
+      <div class="mb-4 py-4 px-5 shadow-lg rounded-4 border border-5">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <p class="lead mb-0">Jarvis (Sudo-Agent)</p>
+          <span class="badge text-bg-secondary mt-1">In progress</span>
+        </div>
+        <p class="mb-2 small text-muted">Python · Ollama (phi3:mini) · Flask · Raspberry Pi 4</p>
+        <p class="mb-0">A local AI agent running entirely on a Raspberry Pi 4 — no cloud dependency, serving a small model through Ollama with a Flask UI on my home network. Right now I'm extending it past a chat demo into something with real tool-calling, retrieval over my own notes, and eventually calendar read/write and reminders. This devlog is where I'm documenting that build as it happens.</p>
+      </div>
+
+      <div class="mb-4 py-4 px-5 shadow-lg rounded-4 border border-5">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <p class="lead mb-0">This devlog</p>
+          <span class="badge text-bg-success mt-1">Live</span>
+        </div>
+        <p class="mb-2 small text-muted">Python · FastAPI · Docker · uv · Render</p>
+        <p class="mb-0">The site you're on right now. Built on FastAPI with Jinja2 templates, dependencies managed with uv, containerised with Docker, and deployed on Render. It's a working project in its own right, and also where I write about building the other one.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

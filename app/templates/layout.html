@@ -1,113 +1,129 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    {% if title %}
-      <title>A Guide to Getting Lost - {{ title }}</title>
-    {% else %}
-      <title>A Guide to Getting Lost</title>
-    {% endif %}
-    <meta name="description" content="A Guide to Getting Lost">
-    <meta name="author" content="Atal Yousafzai">
-    <meta name="theme-color" content="#527c9f">
+  {% if title %}
+    <title>A Guide to Getting Lost - {{ title }}</title>
+  {% else %}
+    <title>A Guide to Getting Lost</title>
+  {% endif %}
+  <meta name="description" content="A Guide to Getting Lost">
+  <meta name="author" content="Atal Yousafzai">
+  <meta name="theme-color" content="#527c9f">
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-          crossorigin="anonymous">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+        crossorigin="anonymous">
 
-    <!-- Styles (loaded after Bootstrap so overrides win) -->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='css/style.css') }}">
+  <!-- Your styles (loaded after Bootstrap so overrides win) -->
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
 </head>
 
 <body class="d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-      <div class="container-lg">
-        <a class="navbar-brand" href="/">Nav Bar</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavDropdown">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link" href="/">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/projects">Tech Projects</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/blog">Devlog</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Music</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">AI Chat bot</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="bd-theme" role="button"
-                 data-bs-toggle="dropdown" aria-expanded="false">
-                <span id="bd-theme-text">Theme</span>
-              </a>
-              <div class="dropdown-menu" aria-labelledby="bd-theme">
-                <button class="dropdown-item" type="button" data-bs-theme-value="light">Light</button>
-                <button class="dropdown-item" type="button" data-bs-theme-value="dark">Dark</button>
-                <button class="dropdown-item" type="button" data-bs-theme-value="auto">Auto</button>
-              </div>
-            </li>
-          </ul>
-        </div>
+
+  <!-- Navbar: https://getbootstrap.com/docs/5.3/components/navbar/ -->
+  <nav class="navbar navbar-expand-sm bg-body-tertiary">
+    <div class="container-lg">
+
+      <a class="navbar-brand" href="/">Nav Bar</a>
+
+      <!-- Collapse toggle button, shown below the "sm" breakpoint -->
+      <button class="navbar-toggler" type="button"
+              data-bs-toggle="collapse" data-bs-target="#navbarNav"
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Collapsible nav links -->
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/projects">Tech Projects</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/blog">Devlog</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Music</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">AI Chat bot</a>
+          </li>
+
+          <!-- Dropdown: https://getbootstrap.com/docs/5.3/components/dropdowns/ -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="bd-theme" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+              <span id="bd-theme-text">Theme</span>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="bd-theme">
+              <li><button class="dropdown-item" type="button" data-bs-theme-value="light">Light</button></li>
+              <li><button class="dropdown-item" type="button" data-bs-theme-value="dark">Dark</button></li>
+              <li><button class="dropdown-item" type="button" data-bs-theme-value="auto">Auto</button></li>
+            </ul>
+          </li>
+        </ul>
       </div>
-    </nav>
 
-    {% block content %}
-    {% endblock content %}
+    </div>
+  </nav>
 
-    <footer class="mt-auto py-3 bg-body-tertiary border-top">
-      <div class="container text-center">
-        <p class="text-body-secondary mb-0">
-          © <span id="year"></span> Atal Yousafzai
-        </p>
-      </div>
-    </footer>
+  {% block content %}
+  {% endblock content %}
 
-    <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  <footer class="mt-auto py-3 bg-body-tertiary border-top">
+    <div class="container text-center">
+      <p class="text-body-secondary mb-0">
+        © <span id="year"></span> Atal Yousafzai
+      </p>
+    </div>
+  </footer>
 
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-            crossorigin="anonymous"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 
-    <script>
-        const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+          crossorigin="anonymous"></script>
 
-        function resolveTheme(choice) {
-            if (choice !== 'auto') return choice;
-            return darkQuery.matches ? 'dark' : 'light';
-        }
+  <!-- Light/dark/auto theme toggle, saved to localStorage -->
+  <script>
+    const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-        function applyTheme(choice) {
-            document.documentElement.setAttribute('data-bs-theme', resolveTheme(choice));
-            localStorage.setItem('theme', choice);
+    function resolveTheme(choice) {
+      if (choice !== 'auto') return choice;
+      return darkQuery.matches ? 'dark' : 'light';
+    }
 
-            const label = document.getElementById('bd-theme-text');
-            if (label) label.textContent = choice.charAt(0).toUpperCase() + choice.slice(1);
-        }
+    function applyTheme(choice) {
+      document.documentElement.setAttribute('data-bs-theme', resolveTheme(choice));
+      localStorage.setItem('theme', choice);
 
-        document.querySelectorAll('[data-bs-theme-value]').forEach(button => {
-            button.addEventListener('click', () => {
-                applyTheme(button.getAttribute('data-bs-theme-value'));
-            });
-        });
+      const label = document.getElementById('bd-theme-text');
+      if (label) label.textContent = choice.charAt(0).toUpperCase() + choice.slice(1);
+    }
 
-        darkQuery.addEventListener('change', () => {
-            if ((localStorage.getItem('theme') || 'auto') === 'auto') applyTheme('auto');
-        });
+    document.querySelectorAll('[data-bs-theme-value]').forEach(button => {
+      button.addEventListener('click', () => {
+        applyTheme(button.getAttribute('data-bs-theme-value'));
+      });
+    });
 
-        applyTheme(localStorage.getItem('theme') || 'auto');
-    </script>
+    darkQuery.addEventListener('change', () => {
+      if ((localStorage.getItem('theme') || 'auto') === 'auto') applyTheme('auto');
+    });
+
+    applyTheme(localStorage.getItem('theme') || 'auto');
+  </script>
+
 </body>
 </html>
