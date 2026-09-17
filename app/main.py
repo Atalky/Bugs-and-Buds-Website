@@ -9,11 +9,18 @@ from pathlib import Path
 from datetime import date
 from schemas import BlogCreate, BlogResponse
 
+from .database import Base, engine
+from .models import Post
+
 BASE_DIR = Path(__file__).resolve().parent   # always point to /Website/app, wherever you run from
 app = FastAPI()
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
+'''
+database
+'''
+Base.metadata.create_all(bind=engine)
 
 '''
 Index
