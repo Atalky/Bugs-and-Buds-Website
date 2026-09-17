@@ -101,6 +101,82 @@ blogs : list[dict] = [
         ),
         "date_posted": "2026-09-08",
     },
+    {
+        "id": 8,
+        "author": "Atal",
+        "title": "Tech projects page and a proper design pass",
+        "content": (
+            "Added a proper Tech Projects page with its own nav link, then spent the rest of the day "
+            "on layout cleanup — stripped out leftover unused styles and stray graphs/images that had "
+            "been cluttering things, fixed another layout bug on the devlog view, and went through the "
+            "design one more time to actually get it looking right instead of just 'working.' Filled in "
+            "real content for the Tech Projects page, added an underline to the active nav link, and "
+            "centered the page titles so they're consistent across pages. Also caught a small but "
+            "annoying navbar bug — one of the links had the wrong id, so it wasn't highlighting correctly."
+        ),
+        "date_posted": "2026-09-09",
+    },
+    {
+        "id": 9,
+        "author": "Atal",
+        "title": "Added smoke tests ahead of CI/CD",
+        "content": "Added the first proper smoke tests — home page, /projects, and /api/blog — so there's an automated baseline check that the app actually boots and the main routes respond, ahead of plugging this into a CI pipeline.",
+        "date_posted": "2026-09-10",
+    },
+    {
+        "id": 10,
+        "author": "Atal",
+        "title": "Got CI/CD Actually Running on GitHub Actions",
+        "content": (
+            "Got the smoke tests from a few days ago actually running automatically — added a GitHub "
+            "Actions workflow that runs pytest on every push instead of only on my machine. Hit a "
+            "genuinely silly bug along the way: I'd accidentally committed a duplicate, broken copy of "
+            "my test file into the wrong folder, which had a broken import and risked clashing with the "
+            "real test file by name. Deleted the wrong one first, then the right one, before sorting out "
+            "which file actually belonged where and fixing the import. CI is green now."
+        ),
+        "date_posted": "2026-09-17",
+    },
+    {
+        "id": 11,
+        "author": "Atal",
+        "title": "Wiring Up a Real Database (and Everything That Went Wrong Along the Way)",
+        "content": (
+            "Finally replaced the SQLite stub with a real PostgreSQL database, running in Docker "
+            "instead of installed natively after the native Windows installer kept getting stuck in "
+            "a broken delete-and-reinstall loop. Moved the connection string into a .env file (kept "
+            "out of git) and switched database.py to build off that instead of a hardcoded SQLite "
+            "path. Took three stacked bugs before it actually worked: a Docker volume that silently "
+            "ignored a new password because Postgres only applies it on first initialization, a "
+            "leftover native Postgres install from that earlier failed attempt quietly squatting on "
+            "the default port and swallowing my connections with no obvious sign it was even involved, "
+            "and a table that refused to appear because I'd never actually imported my model class "
+            "anywhere, so SQLAlchemy had nothing registered to create. All three produced nearly "
+            "identical error messages, which was the real lesson — 'wrong password' and 'you're not "
+            "even talking to the database you think you are' can look exactly the same from the "
+            "outside. The database is live now, but the app is still reading from the same in-memory "
+            "list as before — wiring the actual routes up to it is next, along with real user accounts "
+            "so posting isn't wide open to anyone who finds the API endpoint."
+        ),
+        "date_posted": "2026-09-17",
+    },
+        {
+        "id": 12,
+        "author": "Atal",
+        "title": "CI Needs Its Own Database Too",
+        "content": (
+            "Pushing the real database change immediately broke CI — GitHub Actions had no "
+            "DATABASE_URL at all, since my .env file only exists locally and is (correctly) "
+            "gitignored, so create_engine() was getting None and crashing before a single test "
+            "could even run. Fixed it by giving the CI job its own throwaway Postgres database: a "
+            "service container that spins up alongside the test run, with a health check so tests "
+            "don't start before it's actually ready to accept connections, and a DATABASE_URL "
+            "pointing at that temporary database instead of anything real. Good reminder that "
+            "local secrets don't travel with you to CI — every environment needs to be told where "
+            "its own database actually lives."
+        ),
+        "date_posted": "2026-09-17",
+    },
 ]
 
 '''
