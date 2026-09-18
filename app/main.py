@@ -27,8 +27,13 @@ Index
 '''
 @app.get("/", include_in_schema=False)
 def home(request: Request):
-    
-    return templates.TemplateResponse(request, "index.html", {"events": get_events()})
+    all_posts = get_blogs()
+    recent_posts = list(reversed(all_posts[-3:]))
+    latest_post = recent_posts[0] if recent_posts else None
+    return templates.TemplateResponse(
+        request, "index.html",
+        {"recent_posts": recent_posts, "latest_post": latest_post},
+    )
 
 '''
 Blog

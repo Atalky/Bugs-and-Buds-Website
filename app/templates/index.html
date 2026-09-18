@@ -7,7 +7,47 @@
       <div class="col-md text-center text-md-start">
         <h1 class="display-3">Atal Yousafzai</h1>
         <p class="lead text-muted mb-2">Software developer building toward AI/ML engineering. This is my personal dev space — a running <a href="/blog">devlog</a> of what I'm building, and the tech projects I'm working through as I learn.</p>
+        {% if latest_post %}
+        <p class="mb-0">
+          <span class="badge text-bg-secondary">Currently</span>
+          <a href="{{ url_for('blog_detail', blog_id=latest_post.id) }}" class="ms-1">{{ latest_post.title }}</a>
+        </p>
+        {% endif %}
       </div>
+    </div>
+  </div>
+</section>
+
+{% if recent_posts %}
+<section id="recent-devlog">
+  <div class="container-lg mb-5">
+    <div class="d-flex justify-content-between align-items-end mb-3">
+      <h2 class="h4 mb-0">Recent from the devlog</h2>
+      <a href="/blog" class="small">View all →</a>
+    </div>
+    <div class="row g-3">
+      {% for post in recent_posts %}
+      <div class="col-12 col-md-4">
+        <div class="h-100 py-4 px-4 shadow-lg rounded-4 border border-5">
+          <p class="mb-1 small text-muted">{{ post.date_posted }}</p>
+          <p class="lead mb-2">
+            <a href="{{ url_for('blog_detail', blog_id=post.id) }}" class="text-decoration-none">{{ post.title }}</a>
+          </p>
+          <p class="mb-0 small">{{ post.content[:140] }}{% if post.content|length > 140 %}…{% endif %}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section id="links">
+  <div class="container-lg mb-5">
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-outline-secondary" href="https://github.com/Atalky" target="_blank" rel="noopener">GitHub</a>
+      <a class="btn btn-outline-secondary" href="#" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="btn btn-outline-secondary" href="/projects">Tech Projects</a>
     </div>
   </div>
 </section>
