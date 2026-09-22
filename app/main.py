@@ -383,4 +383,33 @@ blogs : list[dict] = [
         ),
         "date_posted": "2026-09-17",
     },
+    {
+    "id": 13,
+    "author": "Atal",
+    "title": "Real User Accounts: Register, Login, and Three Bugs I Didn't See Coming",
+    "content": (
+        "Got user accounts working end to end — register, login, and passwords that "
+        "are actually hashed before they ever touch the database. Added a User model "
+        "(username, hashed password, a biography field, an admin flag for later) and "
+        "wired /register and /login up to the real Postgres database instead of just "
+        "rendering static forms. Password hashing started on bcrypt, but it turns out "
+        "bcrypt has a hard 72-byte limit on input length and just throws instead of "
+        "silently truncating — hit that almost immediately while testing. Swapped to "
+        "Argon2id instead (passlib + argon2-cffi), which is the more modern, memory-hard "
+        "choice anyway and doesn't have that ceiling. "
+        "Three bugs along the way were worth remembering: a naming collision where my "
+        "own `app.auth` import got shadowed the moment `app = FastAPI()` ran further "
+        "down the same file, since both were using the name `app`; a schema-drift issue "
+        "where I'd added a new `biography` column to the model, but SQLAlchemy's "
+        "create_all() only creates brand-new tables — it never alters one that's already "
+        "there, so the old users table had to be dropped and rebuilt; and a properly "
+        "sneaky one in my own test suite, where Jinja2 was HTML-escaping an apostrophe "
+        "in an error message so the rendered page said \"don&#39;t\" instead of \"don't\" "
+        "— the page was correct, but a plain string-match test against it wasn't. "
+        "Added seven new pytest cases covering the register and login success and "
+        "failure paths, so I'm not manually clicking through the forms every time I "
+        "touch this code. Live on Render now and tested end to end."
+    ),
+    "date_posted": "2026-09-22",
+},
 ]
