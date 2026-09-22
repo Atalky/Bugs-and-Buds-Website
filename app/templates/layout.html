@@ -51,11 +51,12 @@
               <a class="nav-link{% if request.url.path.startswith('/blog') %} active{% endif %}" href="/blog"{% if request.url.path.startswith('/blog') %} aria-current="page"{% endif %}>Devlog</a>
           </li>
           <li class="nav-item">
-              <a class="nav-link" href="#">Music</a>
-          </li> 
+              <a class="nav-link{% if request.url.path.startswith('/login') %} active{% endif %}" href="/login"{% if request.url.path.startswith('/login') %} aria-current="page"{% endif %}>Login</a>
+          </li>
           <li class="nav-item">
               <a class="nav-link" href="#">AI Chat bot</a>
           </li>
+          
           
           <!-- Dropdown: https://getbootstrap.com/docs/5.3/components/dropdowns/ -->
           <li class="nav-item dropdown">

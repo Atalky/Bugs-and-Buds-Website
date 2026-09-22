@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Request , status, HTTPException
+from fastapi import FastAPI, Request, status, HTTPException, Depends, Form
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from fastapi.staticfiles import StaticFiles
@@ -9,14 +9,26 @@ from pathlib import Path
 from datetime import date
 from schemas import BlogCreate, BlogResponse
 
-from .database import Base, engine
-from .models import Post
+from .database import Base, engine, get_db
+from .models import Post, User
+from .auth import hash_password, verify_password
+
+from sqlalchemy.orm import Session
+
+# Password hashing helpers are defined in app/auth.py.
 
 BASE_DIR = Path(__file__).resolve().parent   # always point to /Website/app, wherever you run from
 app = FastAPI()
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
+'''
+Cookies - middleware 
+'''
+from starlette.middleware.sessions import SessionMiddleware
+import os
+
+app.add_middleware(SessionMiddleware, secret_key=os.environ["SECRET_KEY"])
 '''
 database
 '''
@@ -34,6 +46,195 @@ def home(request: Request):
         request, "index.html",
         {"recent_posts": recent_posts, "latest_post": latest_post},
     )
+
+
+'''
+Tech Projects
+'''
+@app.get("/projects", include_in_schema=False)
+def tech_projects(request: Request):
+    return templates.TemplateResponse(request, "techproject.html", {})
+
+'''
+GET /login - renders the login form.
+'''
+@app.get("/login", include_in_schema=False)
+def login_page(request: Request):
+    return templates.TemplateResponse(request, "login.html", {})
+
+'''
+GET /register - renders the signup form.
+'''
+@app.get("/register", include_in_schema=False)
+def register_page(request: Request):
+    return templates.TemplateResponse(request, "register.html", {})
+
+
+'''
+blogs
+'''
+def get_blogs():
+    return blogs
+
+@app.get("/blog", include_in_schema=False)
+def blog_list(request: Request):
+    return templates.TemplateResponse(request, "blog.html", {"blogs": get_blogs()})
+
+@app.get("/blog/{blog_id}", include_in_schema=False, name="blog_detail")
+def blog_detail(request: Request, blog_id: int):
+    found = find_blog_or_404(blog_id)
+    return templates.TemplateResponse(request, "blog_detail.html", {"blog": found})
+
+
+'''
+Api for blogs
+'''
+
+@app.get("/api/blog", response_model=list[BlogResponse])
+def api_get_blogs():
+    return get_blogs()
+
+
+
+def find_blog_or_404(blog_id: int) -> dict:
+    for blog in blogs:
+        if blog["id"] == blog_id:
+            return blog
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found")
+
+
+@app.get("/api/blog/{blog_id}", response_model=BlogResponse)
+def get_blog_api(blog_id: int):
+    return find_blog_or_404(blog_id)
+
+'''
+Create Blog
+'''
+
+@app.post("/api/blog", response_model=BlogResponse, status_code=status.HTTP_201_CREATED)
+def create_blog(payload: BlogCreate):
+    new_id = max((blog["id"] for blog in blogs), default=0) + 1
+    new_blog = {
+        "id": new_id,
+        "author": "Atal",
+        "title": payload.title,
+        "content": payload.content,
+        "date_posted": date.today().isoformat(),
+    }
+    blogs.append(new_blog)
+    return new_blog
+
+
+def get_events():
+    return [
+        {"id": 1, "title": "Gym", "top": 480, "height": 60, "colour": "#0d6efd"},        # 08:00
+        {"id": 2, "title": "Deep work", "top": 600, "height": 120, "colour": "#dc3545"}, # 10:00
+    ]
+
+
+
+
+'''
+exception handler
+'''
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exception: StarletteHTTPException):
+    if request.url.path.startswith("/api"):
+        return JSONResponse(status_code=exception.status_code, 
+                            content={"detail": exception.detail})
+    
+    return templates.TemplateResponse(
+        request, "error.html",
+        {
+        "status_code": exception.status_code, 
+        "message": exception.detail
+        },
+        status_code=exception.status_code,
+    )
+
+'''
+exception handler validaiton 
+'''
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exception: RequestValidationError):
+    if request.url.path.startswith("/api"):
+        return JSONResponse(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, 
+                            content={"detail": exception.errors()})
+    
+    return templates.TemplateResponse(
+        request, "error.html",
+        {
+        "status_code": status.HTTP_422_UNPROCESSABLE_CONTENT, 
+        "message": "Invalid request"
+        },
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+    )
+
+'''
+POST /register - creates a new user account from the signup form.
+Expects form fields: username, password, confirm_password, biography.
+'''
+@app.post("/register", include_in_schema=False)
+def register(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    confirm_password: str = Form(...),
+    biography: str = Form(""),
+    db: Session = Depends(get_db),
+):
+    if password != confirm_password:
+        return templates.TemplateResponse(
+            request, "register.html",
+            {"error": "Passwords do not match"},
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+    existing = db.query(User).filter(User.username == username).first()
+    if existing:
+        return templates.TemplateResponse(
+            request, "register.html",
+            {"error": "Username already taken"},
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+    user = User(
+        username=username,
+        hashed_password=hash_password(password),
+        biography=biography,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    request.session["user_id"] = user.id
+    return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+
+'''
+POST /login - authenticates a user against the users table and starts a session.
+Expects form fields: username, password.
+'''
+@app.post("/login", include_in_schema=False)
+def login(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    user = db.query(User).filter(User.username == username).first()
+    if not user or not verify_password(password, user.hashed_password):
+        return templates.TemplateResponse(
+            request, "login.html",
+            {"error": "Invalid username or password"},
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    request.session["user_id"] = user.id
+    return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+
+
+
+
 
 '''
 Blog
@@ -183,113 +384,3 @@ blogs : list[dict] = [
         "date_posted": "2026-09-17",
     },
 ]
-
-'''
-Tech Projects
-'''
-@app.get("/projects", include_in_schema=False)
-def tech_projects(request: Request):
-    return templates.TemplateResponse(request, "techproject.html", {})
-
-'''
-blogs
-'''
-def get_blogs():
-    return blogs
-
-@app.get("/blog", include_in_schema=False)
-def blog_list(request: Request):
-    return templates.TemplateResponse(request, "blog.html", {"blogs": get_blogs()})
-
-@app.get("/blog/{blog_id}", include_in_schema=False, name="blog_detail")
-def blog_detail(request: Request, blog_id: int):
-    found = find_blog_or_404(blog_id)
-    return templates.TemplateResponse(request, "blog_detail.html", {"blog": found})
-
-
-'''
-Api
-'''
-
-@app.get("/api/blog", response_model=list[BlogResponse])
-def api_get_blogs():
-    return get_blogs()
-
-
-
-def find_blog_or_404(blog_id: int) -> dict:
-    for blog in blogs:
-        if blog["id"] == blog_id:
-            return blog
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found")
-
-
-@app.get("/api/blog/{blog_id}", response_model=BlogResponse)
-def get_blog_api(blog_id: int):
-    return find_blog_or_404(blog_id)
-
-'''
-Create Blog
-'''
-
-@app.post("/api/blog", response_model=BlogResponse, status_code=status.HTTP_201_CREATED)
-def create_blog(payload: BlogCreate):
-    new_id = max((blog["id"] for blog in blogs), default=0) + 1
-    new_blog = {
-        "id": new_id,
-        "author": "Atal",
-        "title": payload.title,
-        "content": payload.content,
-        "date_posted": date.today().isoformat(),
-    }
-    blogs.append(new_blog)
-    return new_blog
-
-
-def get_events():
-    return [
-        {"id": 1, "title": "Gym", "top": 480, "height": 60, "colour": "#0d6efd"},        # 08:00
-        {"id": 2, "title": "Deep work", "top": 600, "height": 120, "colour": "#dc3545"}, # 10:00
-    ]
-
-
-@app.get("/api/calendar")
-def api_calendar():
-    return get_events()
-
-
-'''
-exception handler
-'''
-@app.exception_handler(StarletteHTTPException)
-async def http_exception_handler(request: Request, exception: StarletteHTTPException):
-    if request.url.path.startswith("/api"):
-        return JSONResponse(status_code=exception.status_code, 
-                            content={"detail": exception.detail})
-    
-    return templates.TemplateResponse(
-        request, "error.html",
-        {
-        "status_code": exception.status_code, 
-        "message": exception.detail
-        },
-        status_code=exception.status_code,
-    )
-
-'''
-exception handler validaiton 
-'''
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exception: RequestValidationError):
-    if request.url.path.startswith("/api"):
-        return JSONResponse(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, 
-                            content={"detail": exception.errors()})
-    
-    return templates.TemplateResponse(
-        request, "error.html",
-        {
-        "status_code": status.HTTP_422_UNPROCESSABLE_CONTENT, 
-        "message": "Invalid request"
-        },
-        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-    )

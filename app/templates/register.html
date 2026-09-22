@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<section id="register">
+  <div class="container-lg my-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-6 col-lg-4">
+
+        <h1 class="h3 mb-4 text-center">Sign up</h1>
+
+        {% if error %}
+        <div class="alert alert-danger" role="alert">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="/register" class="p-4 shadow-lg rounded-4 border border-5">
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required autofocus>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+          <div class="mb-3">
+            <label for="confirm_password" class="form-label">Confirm password</label>
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+          </div>
+          <div class="mb-3">
+            <label for="biography" class="form-label">Biography <small class="text-muted">(optional)</small></label>
+            <textarea class="form-control" id="biography" name="biography" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Sign up</button>
+        </form>
+
+        <p class="text-center mt-3 mb-0">
+          <small class="text-muted">Already have an account? <a href="/login">Log in</a></small>
+        </p>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

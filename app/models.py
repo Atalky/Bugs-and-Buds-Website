@@ -20,4 +20,6 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False) #unique so no duplicate usernames
     hashed_password = Column(String, nullable=False) #store the hash, never the raw password
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    biography = Column(String, nullable=True) # Plain text.
     is_admin = Column(Boolean, server_default="false", nullable=False)
+    
