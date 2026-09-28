@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<section id="profile">
+  <div class="container-lg my-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6">
+
+        <h1 class="h3 mb-1 text-center">{{ profile_user.username }}</h1>
+
+        {% if profile_user.biography %}
+          <p class="text-center text-muted mb-4">{{ profile_user.biography }}</p>
+        {% else %}
+          <p class="text-center text-muted mb-4"><em>No bio yet.</em></p>
+        {% endif %}
+
+        <h2 class="h5 mb-3">Devlog posts</h2>
+
+        {% if posts %}
+          <ul class="list-group">
+            {% for post in posts %}
+              <li class="list-group-item">
+                <a href="{{ url_for('blog_detail', blog_id=post.id) }}">{{ post.title }}</a>
+                <div class="text-muted small">{{ post.date_posted }}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted">No devlog posts yet.</p>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

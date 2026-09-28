@@ -69,7 +69,33 @@ GET /register - renders the signup form.
 def register_page(request: Request):
     return templates.TemplateResponse(request, "register.html", {})
 
+'''
+profile pages
+'''
+@app.get("/profile", include_in_schema=False)
+def my_profile(request: Request, db: Session = Depends(get_db)):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    return RedirectResponse(url=f"/profile/{user.username}", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@app.get("/profile/{username}", include_in_schema=False)
+def profile_page(request: Request, username: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    user_posts = [blog for blog in get_blogs() if blog["author"] == user.username]
+    return templates.TemplateResponse(
+        request, "profile.html",
+        {"profile_user": user, "posts": user_posts},
+    )
 '''
 blogs
 '''
