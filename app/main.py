@@ -438,4 +438,53 @@ blogs : list[dict] = [
     ),
     "date_posted": "2026-09-22",
 },
+    {
+        "id": 14,
+        "author": "Atal",
+        "title": "New project: Injection Guard (and learning how LLMs get tested)",
+        "content": (
+            "Started a new project today, separate from this site for now. I picked a real job to aim at, "
+            "a Junior ML Engineer role in AI safety and security, and planned a one-week project that covers "
+            "what it asks for. The project is Injection Guard: it attacks a small LLM with prompt-injection "
+            "attacks to see how often it leaks a secret 'canary' string hidden in its instructions, then tests "
+            "whether a trained detector in front of it makes those attacks fail more often. The plan is to "
+            "report every number with a confidence interval rather than a single score, and later ship the "
+            "detector as an API on AWS. "
+            "Day one was mostly setup and learning. Set up a new repo with uv, ruff (a fast linter and "
+            "formatter), pytest and pre-commit. My first attempt lived inside iCloud Drive in a folder with "
+            "spaces and an ampersand in the path, which broke a uv command and would have had iCloud trying "
+            "to sync thousands of files from the virtual environment and git history, so I moved it to a "
+            "plain local dev folder. Wrote a threat model based on the OWASP Top 10 for LLM applications "
+            "(LLM01, prompt injection) and, more importantly, decided what's out of scope: indirect injection "
+            "through documents, multimodal attacks, adversarial suffixes and multi-turn attacks. That last one "
+            "means my results will be a lower bound on the real risk, and I'd rather say that up front. "
+            "The plan was to attack the phi3:mini model on my Raspberry Pi, but the Pi isn't set up or on "
+            "the same network as my laptop, so I installed Ollama locally and made the model address a "
+            "setting instead of hard-coding it, so it can point at the Pi later. The first real test taught "
+            "me the most: I asked phi3:mini for exactly five words, and it gave six, then added a paragraph "
+            "claiming it had used exactly five. So the model can't be trusted to report on its own behaviour. "
+            "An attack will count as successful only if a plain string check finds the canary in the reply, "
+            "and every run will use temperature 0 and a fixed seed so results are reproducible. Each reply "
+            "takes about 5 seconds once the model is warm, which puts a few hundred attacks at under an hour. "
+            "Spent time understanding Ollama's API properly: the outer JSON reply is always the same shape, "
+            "but you can force the model's actual answer into a JSON schema with the format field, which is "
+            "how the judge will return a typed verdict. I also decided to keep the system prompt in my own "
+            "code rather than baking it into a custom Ollama model, so what was tested stays visible in the "
+            "repo. Other small lessons: switched from Python 3.14 to 3.12 because AWS Lambda images and some "
+            "ML libraries lag behind the newest release (and uv refused to pin 3.12 until I'd loosened "
+            "requires-python first, so order matters); and publishing a branch on GitHub only pushes what's "
+            "been committed, which is why my latest changes seemed to have vanished when they were just "
+            "uncommitted. I logged every decision and the reason for it in a decisions file in the repo. "
+            "To build intuition I played Lakera's Gandalf prompt-injection game, where you try to trick a "
+            "model into revealing a password. Level 1 has no defences at all, and simply asking works, which "
+            "is exactly the 'detector off' baseline I'll be measuring. I also got stuck at around 65% on a "
+            "scored challenge, which showed me how much wording and randomness affect whether an attack "
+            "lands. I'm keeping notes on which prompts work and why, to use as seed attacks later in the week. "
+            "Also downloaded the deepset/prompt-injections dataset (kept out of git) and started exploring it: "
+            "class balance, prompt lengths, language, and whether any texts appear in both the training and "
+            "test sets, since that would make the detector's scores look better than they really are. "
+            "Next up is finishing that analysis and training the first detector."
+        ),
+        "date_posted": "2026-09-30",
+    },
 ]
