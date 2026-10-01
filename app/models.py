@@ -1,17 +1,7 @@
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime, Text
+from sqlalchemy.orm import relationship
 from .database import Base
-
-class Post(Base):
-    __tablename__ = "posts"
-
-    id = Column(Integer, primary_key=True, index=True) #index=True -- not needed but here for clarity
-    title = Column(String, nullable=False)
-    content = Column(String, nullable=False)
-    author = Column(String, nullable=False)
-    date_posted = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    published = Column(Boolean, server_default="true", nullable=False)
-
 
 class User(Base):
     __tablename__ = "users"
@@ -22,4 +12,35 @@ class User(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     biography = Column(String, nullable=True) # Plain text.
     is_admin = Column(Boolean, server_default="false", nullable=False)
+
+    projects = relationship("Project", back_populates="owner")
+    posts = relationship("Post", back_populates="author")
+class Project(Base):
+    __tablename__ = "projects"
+
+    id = Column(Integer, primary_key=True, index=True)
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    name = Column(String, nullable=False)
+    slug = Column(String, unique=True, index=True, nullable=False)  # for clean URLs like /projects/sudo-agent
+    description = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    owner = relationship("User", back_populates="projects")
+    posts = relationship("Post", back_populates="project")
     
+class Post(Base):
+    __tablename__ = "posts"
+
+    id = Column(Integer, primary_key=True, index=True) #index=True -- not needed but here for clarity
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
+    title = Column(String, nullable=False)
+    content = Column(Text, nullable=False)
+    author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    date_posted = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    published = Column(Boolean, server_default="true", nullable=False)
+    on_main_devlog = Column(Boolean, server_default="false", nullable=False)
+
+    author = relationship("User", back_populates="posts")
+    project = relationship("Project", back_populates="posts")
+

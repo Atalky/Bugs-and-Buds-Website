@@ -111,3 +111,66 @@ def test_login_wrong_password_shows_error():
     )
     assert response.status_code == 401
     assert "Invalid username or password" in response.text
+
+'''
+
+'''
+
+def _register(test_client, username, password="correct-password", biography=""):
+    """Registers a user through the real /register route; leaves test_client logged in as them."""
+    return test_client.post(
+        "/register",
+        data={
+            "username": username,
+            "password": password,
+            "confirm_password": password,
+            "biography": biography,
+        },
+        follow_redirects=False,
+    )
+
+
+def test_navbar_has_profile_link():
+    response = client.get("/")
+    assert 'href="/profile"' in response.text
+
+
+def test_profile_redirects_to_login_when_logged_out():
+    fresh_client = TestClient(app)  # no session cookie
+    response = fresh_client.get("/profile", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
+def test_profile_redirects_to_own_page_when_logged_in():
+    fresh_client = TestClient(app)
+    username = _unique_username()
+    _register(fresh_client, username)
+
+    response = fresh_client.get("/profile", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == f"/profile/{username}"
+
+
+def test_profile_page_shows_username_and_bio():
+    username = _unique_username()
+    _register(TestClient(app), username, biography="Test bio for the profile page")
+
+    response = client.get(f"/profile/{username}")
+    assert response.status_code == 200
+    assert username in response.text
+    assert "Test bio for the profile page" in response.text
+
+
+def test_profile_page_without_bio_shows_placeholder():
+    username = _unique_username()
+    _register(TestClient(app), username)
+
+    response = client.get(f"/profile/{username}")
+    assert response.status_code == 200
+    assert "No bio yet." in response.text
+
+
+def test_profile_unknown_user_returns_404():
+    response = client.get(f"/profile/{_unique_username()}")
+    assert response.status_code == 404
