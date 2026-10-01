@@ -487,4 +487,29 @@ blogs : list[dict] = [
         ),
         "date_posted": "2026-09-30",
     },
+    {
+        "id": 15,
+        "author": "Atal",
+        "title": "Foreign keys, real authors, and a plan for private posts",
+        "content": (
+            "Spent today on the data model behind the next big feature. Posts used to store their author "
+            "as a plain string; now they point at a real user through an author_id foreign key, and can "
+            "optionally belong to a project through project_id. Users own projects, projects hold posts, and "
+            "SQLAlchemy relationships let me walk between them in templates, like post.author.username, "
+            "instead of writing joins by hand. "
+            "The thing that finally made relationships click: SQLAlchemy works out which side is the one and "
+            "which is the many purely from which table holds the foreign key column. back_populates only "
+            "pairs two attributes up; it says nothing about direction. "
+            "Two mistakes in my own first draft were worth remembering. I named the foreign key column and "
+            "the relationship both author, and since a class body runs top to bottom like normal Python, the "
+            "second line silently replaced the first and the column vanished. I also briefly had a unique "
+            "username column on posts, which would have stopped anyone from ever writing a second post. "
+            "Added six tests for the profile pages, taking the suite to 16 passing, and fixed CI, which had "
+            "no SECRET_KEY set, so the app could not even import there once login was added. "
+            "Also planned what comes next: an Instagram-style home page with a public Discover feed and a "
+            "Following tab, where each post can be public, followers-only or close-friends-only on the same "
+            "account."
+        ),
+        "date_posted": "2026-10-01",
+    },
 ]
