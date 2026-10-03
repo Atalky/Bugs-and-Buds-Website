@@ -12,9 +12,9 @@ class User(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     biography = Column(String, nullable=True) # Plain text.
     is_admin = Column(Boolean, server_default="false", nullable=False)
-
     projects = relationship("Project", back_populates="owner")
     posts = relationship("Post", back_populates="author")
+    
 class Project(Base):
     __tablename__ = "projects"
 
@@ -43,4 +43,15 @@ class Post(Base):
 
     author = relationship("User", back_populates="posts")
     project = relationship("Project", back_populates="posts")
+
+
+class Follow(Base):
+    """One user following another. status stays "pending" until accepted when the followed user approves followers."""
+
+    __tablename__ = "follows"
+
+    follower_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    followed_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    status = Column(String, server_default="accepted", nullable=False)  # "pending" | "accepted"
+    followed_time = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 

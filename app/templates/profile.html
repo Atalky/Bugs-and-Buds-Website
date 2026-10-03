@@ -8,6 +8,18 @@
 
         <h1 class="h3 mb-1 text-center">{{ profile_user.username }}</h1>
 
+        <p class="text-center small text-muted mb-2">{{ follower_count }} followers · {{ following_count }} following</p>
+
+        {% if viewer and viewer.id != profile_user.id %}
+          <form method="post" action="/profile/{{ profile_user.username }}/follow" class="text-center mb-3">
+            {% if is_following %}
+              <button type="submit" class="btn btn-outline-secondary btn-sm">Following</button>
+            {% else %}
+              <button type="submit" class="btn btn-primary btn-sm">Follow</button>
+            {% endif %}
+          </form>
+        {% endif %}
+
         {% if profile_user.biography %}
           <p class="text-center text-muted mb-4">{{ profile_user.biography }}</p>
         {% else %}

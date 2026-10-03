@@ -10,7 +10,7 @@ from datetime import date
 from schemas import BlogCreate, BlogResponse
 
 from .database import Base, engine, get_db
-from .models import Post, User
+from .models import Follow, Post, User
 from .auth import hash_password, verify_password
 
 from sqlalchemy.orm import Session
@@ -91,10 +91,22 @@ def profile_page(request: Request, username: str, db: Session = Depends(get_db))
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
+    viewer = current_user(request, db)
+    is_following = viewer is not None and db.get(Follow, (viewer.id, user.id)) is not None
+    follower_count = db.query(Follow).filter(Follow.followed_id == user.id, Follow.status == "accepted").count()
+    following_count = db.query(Follow).filter(Follow.follower_id == user.id, Follow.status == "accepted").count()
+
     user_posts = [blog for blog in get_blogs() if blog["author"] == user.username]
     return templates.TemplateResponse(
         request, "profile.html",
-        {"profile_user": user, "posts": user_posts},
+        {
+            "profile_user": user,
+            "posts": user_posts,
+            "viewer": viewer,
+            "is_following": is_following,
+            "follower_count": follower_count,
+            "following_count": following_count,
+        },
     )
 '''
 blogs
@@ -259,8 +271,37 @@ def login(
     return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
 
 
+'''
+Follow
+'''
+
+def current_user(request: Request, db: Session) -> User | None:
+    """Return the logged-in User, or None when logged out or the account no longer exists."""
+    user_id = request.session.get("user_id")
+    return db.get(User, user_id) if user_id else None
 
 
+
+@app.post("/profile/{username}/follow", include_in_schema=False)
+def toggle_follow(request: Request, username: str, db: Session = Depends(get_db)):
+    viewer = current_user(request, db)
+    if viewer is None:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    target = db.query(User).filter(User.username == username).first()
+    if target is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    if target.id == viewer.id:
+        return RedirectResponse(url=f"/profile/{username}", status_code=status.HTTP_303_SEE_OTHER)
+    
+    existing = db.get(Follow, (viewer.id, target.id))
+    if existing:
+        db.delete(existing)
+    else:
+        db.add(Follow(follower_id=viewer.id, followed_id=target.id))
+    db.commit()
+
+    return RedirectResponse(url=f"/profile/{username}", status_code=status.HTTP_303_SEE_OTHER)
 
 '''
 Blog
