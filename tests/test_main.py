@@ -174,3 +174,23 @@ def test_profile_page_without_bio_shows_placeholder():
 def test_profile_unknown_user_returns_404():
     response = client.get(f"/profile/{_unique_username()}")
     assert response.status_code == 404
+
+
+def _new_user():
+    """Registers a fresh user; returns (logged-in client, username)."""
+    user_client = TestClient(app)
+    username = _unique_username()
+    _register(user_client, username)
+    return user_client, username
+
+
+def test_follow_increases_follower_count():
+    _, target_name = _new_user()
+    follower, _ = _new_user()
+
+    response = follower.post(f"/profile/{target_name}/follow", follow_redirects=False)
+    assert response.status_code == 303
+
+    page = follower.get(f"/profile/{target_name}").text
+    assert "1 followers" in page
+    assert "Following" in page
