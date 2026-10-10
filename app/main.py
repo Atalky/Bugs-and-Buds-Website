@@ -560,4 +560,33 @@ blogs : list[dict] = [
         ),
         "date_posted": "2026-10-01",
     },
+    {
+        "id": 16,
+        "author": "Atal",
+        "title": "Following, a proper account menu, and Python 3.15 breaking my deploy",
+        "content": (
+            "Users can now follow each other. A follow is just a row in a new follows table with two "
+            "columns, follower_id and followed_id, both pointing at the users table. The pair together is "
+            "the primary key, so the database itself refuses a duplicate follow and there is no need for a "
+            "separate id. One route handles the Follow button: it checks you are logged in, that the user "
+            "exists and that you are not trying to follow yourself, then deletes the row if it exists "
+            "(unfollow) or adds it if not (follow). Profile pages now show follower and following counts, "
+            "which are just counts of rows where that user appears in each column. "
+            "Also sorted the navbar, which used to show Login even when you were logged in. Logged-out "
+            "visitors now see Sign in and Sign up; logged-in users get an Account menu with their profile "
+            "and Sign out. Sign out is a small form that POSTs to /logout and clears the session, rather than "
+            "a plain link, since browsers and link previews sometimes open links on their own. My first try "
+            "returned a 404 because I had added the button before the route existed. Added tests for "
+            "following, both navbar states and signing out, using FastAPI's TestClient as a fake browser, "
+            "with a separate client per user so each keeps its own login cookie. "
+            "Then the Render deploy broke while every test passed. The Dockerfile used a Python 3.13 image "
+            "but the project requires 3.14 or newer, so uv had been quietly downloading its own Python on "
+            "every build. This week Python 3.15 came out, uv grabbed it, and httptools (pulled in by "
+            "uvicorn) has no prebuilt package for 3.15 yet, so it tried to compile from source on an image "
+            "with no C compiler. CI passed only because GitHub's runners have one. Fixed it by moving the "
+            "image to Python 3.14 and telling uv never to download a different Python, so a mismatch now "
+            "fails loudly instead of silently."
+        ),
+        "date_posted": "2026-10-10",
+    },
 ]
