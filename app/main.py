@@ -270,6 +270,13 @@ def login(
     request.session["user_id"] = user.id
     return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
 
+'''
+Logout
+'''
+@app.post("/logout", include_in_schema=False)
+def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
 
 '''
 Follow

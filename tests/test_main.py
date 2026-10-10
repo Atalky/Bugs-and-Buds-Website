@@ -194,3 +194,24 @@ def test_follow_increases_follower_count():
     page = follower.get(f"/profile/{target_name}").text
     assert "1 followers" in page
     assert "Following" in page
+
+
+def test_navbar_logged_out_shows_sign_in():
+    text = TestClient(app).get("/").text
+    assert 'href="/login"' in text
+    assert 'action="/logout"' not in text
+
+
+def test_navbar_logged_in_shows_account_menu():
+    user_client, _ = _new_user()
+    text = user_client.get("/").text
+    assert 'action="/logout"' in text
+    assert 'href="/profile"' in text
+
+
+def test_logout_clears_session():
+    user_client, _ = _new_user()
+    response = user_client.post("/logout", follow_redirects=False)
+    assert response.status_code == 303
+    after = user_client.get("/profile", follow_redirects=False)
+    assert after.headers["location"] == "/login"

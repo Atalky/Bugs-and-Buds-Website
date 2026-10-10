@@ -50,17 +50,9 @@
           <li class="nav-item">
               <a class="nav-link{% if request.url.path.startswith('/blog') %} active{% endif %}" href="/blog"{% if request.url.path.startswith('/blog') %} aria-current="page"{% endif %}>Devlog</a>
           </li>
-          
-          <li class="nav-item">
-              <a class="nav-link{% if request.url.path.startswith('/profile') %} active{% endif %}" href="/profile"{% if request.url.path.startswith('/profile') %} aria-current="page"{% endif %}>Profile</a>
-          </li>
-          <li class="nav-item">
-              <a class="nav-link{% if request.url.path.startswith('/login') %} active{% endif %}" href="/login"{% if request.url.path.startswith('/login') %} aria-current="page"{% endif %}>Login</a>
-          </li>
           <li class="nav-item">
               <a class="nav-link" href="#">AI Chat bot</a>
           </li>
-          
           
           <!-- Dropdown: https://getbootstrap.com/docs/5.3/components/dropdowns/ -->
           <li class="nav-item dropdown">
@@ -75,6 +67,26 @@
             </ul>
           </li>
         </ul>
+        <ul class="navbar-nav ms-auto">
+          {% if request.session.get("user_id") %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Account</a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <form method="post" action="/logout">
+                    <button type="submit" class="dropdown-item">Sign out</button>
+                  </form>
+                </li>
+              </ul>
+            </li>
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="/login">Sign in</a></li>
+            <li class="nav-item"><a class="btn btn-primary btn-sm ms-sm-2 my-1" href="/register">Sign up</a></li>
+          {% endif %}
+        </ul>        
+        
       </div>
 
     </div>
